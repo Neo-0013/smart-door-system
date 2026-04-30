@@ -1,0 +1,20 @@
+# Python / Backend
+backend/__pycache__/
+backend/.env
+backend/smart_door.db
+backend/firebase-service-account.json
+backend/images/
+backend/known_faces/
+backend/test_visitor.jpg
+.venv/
+venv/
+*.pyc
+
+# Flutter / Frontend
+smart_door_app/.dart_tool/
+smart_door_app/.flutter-plugins
+smart_door_app/.flutter-plugins-dependencies
+smart_door_app/.packages
+smart_door_app/build/
+smart_door_app/android/local.properties
+smart_door_app/android/key.properties
