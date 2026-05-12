@@ -1,6 +1,6 @@
 # 🔐 Smart Door Security System
 
-A complete IoT smart door system with face recognition (Raspberry Pi 4) and a Flutter mobile app for remote control.
+A complete IoT smart door system with face recognition (runs on Linux or Raspberry Pi) and a Flutter mobile app for remote control.
 
 **100% Free — No Firebase — No Paid APIs — Self-hosted**
 
@@ -8,15 +8,15 @@ A complete IoT smart door system with face recognition (Raspberry Pi 4) and a Fl
 
 ## 📁 Project Structure
 
-```
+```text
 Smart Door Security System/
-├── backend/          ← FastAPI server (runs on Raspberry Pi 4)
+├── backend/          ← FastAPI server (runs on Linux or Raspberry Pi)
 └── smart_door_app/   ← Flutter app (Android + iOS)
 ```
 
 ---
 
-## 🖥️ Backend Setup (Raspberry Pi 4)
+## 🖥️ Backend Setup (Linux & Raspberry Pi)
 
 ### 1. Install Python dependencies
 
@@ -26,13 +26,22 @@ cp .env.example .env
 # Edit .env with your settings (SECRET_KEY, admin email/password, etc.)
 nano .env
 
+# Install general requirements
 pip install -r requirements.txt
 ```
 
-### 2. On Raspberry Pi, also install RPi-specific packages
+### 2. Platform-Specific Packages
 
+**For Raspberry Pi:**
+Install packages required for hardware GPIO and Pi Camera:
 ```bash
 pip install RPi.GPIO picamera2 face_recognition numpy
+```
+
+**For standard Linux (PC/Server):**
+You can run the backend without hardware locking/camera by using the simulation scripts, or install standard OpenCV for USB webcams:
+```bash
+pip install opencv-python face_recognition numpy
 ```
 
 ### 3. Run the backend server
@@ -47,12 +56,19 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 ### 4. Access the API docs
 
-Open: `http://<your-rpi-ip>:8000/docs`
+Open: `http://<your-server-ip>:8000/docs`
 
 ### 5. Start the face watcher (in a separate terminal)
 
+**On Raspberry Pi:**
 ```bash
 python face_recognition_module/face_watcher.py
+```
+
+**On standard Linux (Testing/Simulation):**
+If you don't have a physical camera/door connected, you can run the camera simulator:
+```bash
+python simulate_camera.py
 ```
 
 ---
@@ -61,11 +77,19 @@ python face_recognition_module/face_watcher.py
 
 This gives you a public HTTPS URL so the app works anywhere, not just on local Wi-Fi.
 
-### Install cloudflared on Raspberry Pi
+### Install cloudflared (Linux & Raspberry Pi)
 
+**For Raspberry Pi (ARM64):**
 ```bash
 curl -L --output cloudflared.deb \
   https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64.deb
+sudo dpkg -i cloudflared.deb
+```
+
+**For standard Linux (x86_64 PC):**
+```bash
+curl -L --output cloudflared.deb \
+  https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
 sudo dpkg -i cloudflared.deb
 ```
 
@@ -187,7 +211,9 @@ flutter build apk --release
 
 ## 🔌 GPIO Wiring (Raspberry Pi 4)
 
-```
+*Note: Skip this section if running on a standard Linux PC for testing.*
+
+```text
 RPi GPIO Pin 18 (BCM) → Relay IN
 Relay COM → Door Lock +
 Relay NC → 12V Power
@@ -197,7 +223,7 @@ Door Lock: 12V electric strike/magnetic lock (any)
 ```
 
 Change pin in `.env`:
-```
+```text
 DOOR_GPIO_PIN=18
 ```
 
@@ -215,19 +241,19 @@ DOOR_GPIO_PIN=18
 | Fallback Auth | PIN + TOTP |
 | Remote Access | Cloudflare Tunnel (free) |
 | Face Recognition | dlib + face_recognition |
-| Camera | picamera2 (RPi 4) |
+| Camera | picamera2 (RPi 4) / OpenCV (Linux) |
 | Door Control | RPi.GPIO |
 
 ---
 
 ## 🚀 Quick Start Summary
 
-```
-1. Clone/copy project to Raspberry Pi 4
-2. pip install -r backend/requirements.txt
+```text
+1. Clone/copy project to Linux PC or Raspberry Pi
+2. pip install -r backend/requirements.txt (and platform specific packages)
 3. Copy .env.example to .env and configure
 4. python backend/main.py  ← starts the server
-5. python backend/face_recognition_module/face_watcher.py  ← starts camera
+5. python backend/face_recognition_module/face_watcher.py (or simulate_camera.py)  ← starts camera
 6. cloudflared tunnel --url http://localhost:8000  ← gets public URL
 7. Put URL in Flutter app api_config.dart
 8. flutter build apk --release  ← build the Android APK
